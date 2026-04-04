@@ -1,17 +1,9 @@
-# my_secretspace
+SecretSpace
+A secure, theme-customizable digital diary and mood-tracking application that allows users to record personal memories and visualize emotional trends through dynamic charts and weekly summaries built with Flutter.
 
-A new Flutter project.
+Features
+Gender-Specific Themes: Personalized UI for Boy and Girl profiles.
 
-## Getting Started
+Mood Tracking: Log your daily emotions with visual summaries.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Secure Storage: Private entries saved locally using SharedPreferences.
