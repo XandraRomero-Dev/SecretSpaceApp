@@ -18,7 +18,6 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
-        // Table 1: USER
         await db.execute('''
           CREATE TABLE USER (
             UserID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +29,6 @@ class DatabaseHelper {
           )
         ''');
 
-        // Table 2: USER_SETTINGS
         await db.execute('''
           CREATE TABLE USER_SETTINGS (
             SettingID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +40,6 @@ class DatabaseHelper {
           )
         ''');
 
-        // Table 3: DIARY_ENTRY
         await db.execute('''
           CREATE TABLE DIARY_ENTRY (
             EntryID INTEGER PRIMARY KEY AUTOINCREMENT,

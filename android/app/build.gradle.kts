@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -7,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.my_secretspace"
-    compileSdk = flutter.compileSdkVersion
+    compileSdkVersion(flutter.compileSdkVersion)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -16,18 +19,18 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.my_secretspace"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+    applicationId = "com.secretspace.app"
+    minSdk = flutter.minSdkVersion
+    targetSdkVersion(flutter.targetSdkVersion)
+    
+    versionCode = (project.findProperty("flutter.versionCode") as String? ?: "1").toInt()
+    versionName = project.findProperty("flutter.versionName") as String? ?: "1.0.0"
+    
+    multiDexEnabled = true
     }
 
     buildTypes {

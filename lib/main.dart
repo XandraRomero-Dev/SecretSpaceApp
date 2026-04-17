@@ -14,8 +14,13 @@ import 'services/auth_service.dart';
 import 'services/diary_service.dart';
 import 'models/diary_entry.dart';
 import 'utils/app_constants.dart';
+import 'services/database_helper.dart';
 
-void main() => runApp(const SecretSpaceApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseHelper.database;
+  runApp(const SecretSpaceApp());
+}
 
 class SecretSpaceApp extends StatelessWidget {
   const SecretSpaceApp({super.key});
@@ -111,7 +116,11 @@ class _MainFlowState extends State<MainFlow> {
       customText = Color(prefs.getInt('customText') ?? 0xFF795548);
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
       if (isLoggedIn) {
-        username = prefs.getString('username') ?? "Kimidora";
+        final genderKey = isMale ? "boy" : "girl";
+        username =
+            prefs.getString('user_${userEmail}_${genderKey}_name') ??
+            prefs.getString('username') ??
+            "";
         userEmail = prefs.getString('email') ?? "";
       }
     });
@@ -131,14 +140,23 @@ class _MainFlowState extends State<MainFlow> {
     if (e.isEmpty || p.isEmpty) return;
 
     if (isLogin) {
-      // EXISTING LOGIN LOGIC
       if (await AuthService.login(e, p, isMale)) {
         _init();
-      } else {}
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid credentials or wrong gender.")),
+        );
+      }
     } else {
-      await AuthService.register(u, e, p, isMale);
-      await AuthService.login(e, p, isMale);
-      _init();
+      final message = await AuthService.register(u, e, p, isMale);
+      if (message != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      } else {
+        await AuthService.login(e, p, isMale);
+        _init();
+      }
     }
   }
 
@@ -325,9 +343,12 @@ class _MainFlowState extends State<MainFlow> {
 
   void _showProfile() async {
     final prefs = await SharedPreferences.getInstance();
+    final genderKey = isMale ? "boy" : "girl";
     String joined =
-        prefs.getString('user_${userEmail}_joined') ?? "Not Available";
+        prefs.getString('user_${userEmail}_${genderKey}_joined') ??
+        "Not Available";
 
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -396,9 +417,10 @@ class _MainFlowState extends State<MainFlow> {
           if (selBg != null) customBg = selBg!;
           if (selText != null) customText = selText!;
         });
-        await prefs.setInt('customPrimary', customPrimary.value);
-        await prefs.setInt('customBg', customBg.value);
-        await prefs.setInt('customText', customText.value);
+        await prefs.setInt('customPrimary', customPrimary.toARGB32());
+        await prefs.setInt('customBg', customBg.toARGB32());
+        await prefs.setInt('customText', customText.toARGB32());
+        if (!mounted) return;
         Navigator.pop(context);
       },
       onReset: () => setState(() {

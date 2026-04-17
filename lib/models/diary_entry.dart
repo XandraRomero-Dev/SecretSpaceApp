@@ -50,4 +50,32 @@ class DiaryEntry {
   String toJson() => json.encode(toMap());
   factory DiaryEntry.fromJson(String source) =>
       DiaryEntry.fromMap(json.decode(source));
+
+  Map<String, dynamic> toDbMap(String email, bool isMale) {
+    return {
+      'userEmail': email,
+      'isMale': isMale ? 1 : 0,
+      'Title': title,
+      'Content': content,
+      'Date': date,
+      'Happy': happy,
+      'Sad': sad,
+      'Anxious': anxious,
+      'Angry': angry,
+      'DisplayIndex': displayIndex,
+    };
+  }
+
+  factory DiaryEntry.fromDbMap(Map<String, Object?> map) {
+    return DiaryEntry(
+      title: map['Title'] as String? ?? '',
+      content: map['Content'] as String? ?? '',
+      date: map['Date'] as String? ?? '',
+      happy: map['Happy'] as int? ?? 0,
+      sad: map['Sad'] as int? ?? 0,
+      anxious: map['Anxious'] as int? ?? 0,
+      angry: map['Angry'] as int? ?? 0,
+      displayIndex: map['DisplayIndex'] as int?,
+    );
+  }
 }

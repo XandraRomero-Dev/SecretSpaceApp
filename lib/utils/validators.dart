@@ -19,21 +19,32 @@ class Validators {
     }
 
     if (!value.contains(RegExp(r'[A-Z]'))) {
-      return 'Must contain at least one uppercase letter';
+      return 'Password must contain at least one uppercase letter';
     }
 
     if (!value.contains(RegExp(r'[a-z]'))) {
-      return 'Must contain at least one lowercase letter';
+      return 'Password must contain at least one lowercase letter';
     }
 
     if (!value.contains(RegExp(r'[0-9]'))) {
-      return 'Must contain at least one number';
+      return 'Password must contain at least one number';
     }
 
     if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-      return 'Must contain at least one special character';
+      return 'Password must contain at least one special character';
     }
 
+    return null;
+  }
+
+  static String? validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter an email address';
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Please enter a valid email address';
+    }
     return null;
   }
 }

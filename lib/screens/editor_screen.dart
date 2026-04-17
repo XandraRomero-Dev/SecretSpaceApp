@@ -80,7 +80,7 @@ class EditorScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: bgColor.withOpacity(0.5),
+            backgroundColor: bgColor.withValues(alpha: 0.5),
             child: Image.asset(path, height: 35),
           ),
           Text(

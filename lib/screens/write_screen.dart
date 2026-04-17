@@ -25,7 +25,7 @@ class WriteScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: primaryColor.withOpacity(0.4),
+        backgroundColor: primaryColor.withValues(alpha: 0.4),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: onBack,
