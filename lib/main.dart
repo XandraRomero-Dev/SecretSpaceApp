@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'screens/gender_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/editor_screen.dart';
@@ -18,6 +21,13 @@ import 'services/database_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 5));
+  } catch (e) {
+    print("Firebase init failed or timed out: $e");
+  }
   await DatabaseHelper.database;
   runApp(const SecretSpaceApp());
 }
@@ -110,22 +120,32 @@ class _MainFlowState extends State<MainFlow> {
 
   void _init() async {
     final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('email') ?? "";
+    final savedIsMale = prefs.getBool('isMale') ?? false;
+    final savedIsLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    String savedUsername = "";
+    if (savedIsLoggedIn) {
+      final genderKey = savedIsMale ? "boy" : "girl";
+      savedUsername =
+          prefs.getString('user_${savedEmail}_${genderKey}_name') ??
+          prefs.getString('username') ??
+          "";
+    }
+
     setState(() {
       customPrimary = Color(prefs.getInt('customPrimary') ?? 0xFF8B5E3C);
       customBg = Color(prefs.getInt('customBg') ?? 0xFFFEFEE2);
       customText = Color(prefs.getInt('customText') ?? 0xFF795548);
-      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-      if (isLoggedIn) {
-        final genderKey = isMale ? "boy" : "girl";
-        username =
-            prefs.getString('user_${userEmail}_${genderKey}_name') ??
-            prefs.getString('username') ??
-            "";
-        userEmail = prefs.getString('email') ?? "";
-      }
+      isLoggedIn = savedIsLoggedIn;
+      isMale = savedIsMale;
+      userEmail = savedEmail;
+      username = savedUsername;
     });
+
     if (isLoggedIn) {
       entries = await DiaryService.loadEntries(userEmail, isMale);
+      if (mounted) setState(() {});
       _pageController.jumpToPage(2);
     }
   }
@@ -231,9 +251,11 @@ class _MainFlowState extends State<MainFlow> {
             entries: entries,
             primaryColor: customPrimary,
             onAdd: () => goTo(5),
-            onDelete: (i) async {
+            onDelete: (String? id, int i) async {
+              if (id != null) {
+                await DiaryService.deleteEntry(id, userEmail, isMale);
+              }
               setState(() => entries.removeAt(i));
-              await DiaryService.saveEntries(entries, userEmail, isMale);
             },
             onOpen: (i) {
               setState(() => selectedEntry = entries[i]);
@@ -289,8 +311,22 @@ class _MainFlowState extends State<MainFlow> {
       angry: ang,
       displayIndex: entries.length,
     );
+
+    final newId = await DiaryService.addEntry(entry, userEmail, isMale);
+    final savedEntry = DiaryEntry(
+      id: newId,
+      title: entry.title,
+      content: entry.content,
+      date: entry.date,
+      happy: entry.happy,
+      sad: entry.sad,
+      anxious: entry.anxious,
+      angry: entry.angry,
+      displayIndex: entry.displayIndex,
+    );
+
     setState(() {
-      entries.add(entry);
+      entries.add(savedEntry);
       h = 0;
       s = 0;
       anx = 0;
@@ -298,7 +334,7 @@ class _MainFlowState extends State<MainFlow> {
       diaryTitleCtrl.clear();
       diaryContentCtrl.clear();
     });
-    await DiaryService.saveEntries(entries, userEmail, isMale);
+
     goTo(4);
   }
 

@@ -4,7 +4,7 @@ import '../models/diary_entry.dart';
 class LibraryScreen extends StatelessWidget {
   final List<DiaryEntry> entries;
   final Color primaryColor;
-  final Function(int) onDelete;
+  final Function(String?, int) onDelete;
   final Function(int) onOpen;
   final VoidCallback onAdd;
   final VoidCallback onBack;
@@ -63,7 +63,7 @@ class LibraryScreen extends StatelessWidget {
                               color: Colors.red,
                               size: 18,
                             ),
-                            onPressed: () => onDelete(i),
+                            onPressed: () => onDelete(entries[i].id, i),
                           ),
                         ),
                       ],

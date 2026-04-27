@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'database_helper.dart';
 
 class AuthService {
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
+    await _auth.signOut();
     await prefs.setBool('isLoggedIn', false);
     await prefs.remove('email');
     await prefs.remove('username');
@@ -16,43 +19,27 @@ class AuthService {
     String p,
     bool isMale,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final db = await DatabaseHelper.database;
-    final genderKey = isMale ? "boy" : "girl";
-    final accountKey = 'user_${e}_${genderKey}';
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final oppositeKey = 'user_${e}_${isMale ? "girl" : "boy"}_pass';
-    if (prefs.containsKey(oppositeKey)) {
-      return "This account already exists in the ${isMale ? "girl" : "boy"} side.";
+      // Create user in Firebase Auth
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: e,
+        password: p,
+      );
+
+      User? user = result.user;
+      if (user != null) {
+        await user.updateDisplayName(u);
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('email', e);
+        await prefs.setString('username', u);
+        await prefs.setBool('isMale', isMale);
+      }
+      return null;
+    } on FirebaseAuthException catch (error) {
+      return error.message;
     }
-
-    final existing = await db.query(
-      'USER',
-      where: 'Email = ? AND isMale = ?',
-      whereArgs: [e, isMale ? 1 : 0],
-    );
-    if (existing.isNotEmpty) {
-      return "This account already exists in the ${isMale ? "boy" : "girl"} side.";
-    }
-
-    String joinDate = DateTime.now().toString().split(' ')[0];
-    await prefs.setString('${accountKey}_name', u);
-    await prefs.setString('${accountKey}_pass', p);
-    await prefs.setString('${accountKey}_joined', joinDate);
-    await prefs.setBool('isLoggedIn', true);
-    await prefs.setString('email', e);
-    await prefs.setString('username', u);
-    await prefs.setBool('isMale', isMale);
-
-    await db.insert('USER', {
-      'Username': u,
-      'Email': e,
-      'Password': p,
-      'isMale': isMale ? 1 : 0,
-      'JoinDate': joinDate,
-    });
-
-    return null;
   }
 
   static Future<bool> login(
@@ -60,28 +47,24 @@ class AuthService {
     String p,
     bool currentSelectionIsMale,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final db = await DatabaseHelper.database;
-    final genderKey = currentSelectionIsMale ? "boy" : "girl";
-    final accountKey = 'user_${e}_${genderKey}';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      UserCredential result = await _auth.signInWithEmailAndPassword(
+        email: e,
+        password: p,
+      );
 
-    String? savedPass = prefs.getString('${accountKey}_pass');
-    String? savedName = prefs.getString('${accountKey}_name');
-
-    if (savedPass != null && savedPass == p) {
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('email', e);
-      await prefs.setString('username', savedName ?? "");
-      await prefs.setBool('isMale', currentSelectionIsMale);
-      return true;
+      User? user = result.user;
+      if (user != null) {
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('email', e);
+        await prefs.setString('username', user.displayName ?? "");
+        await prefs.setBool('isMale', currentSelectionIsMale);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
-
-    final result = await db.query(
-      'USER',
-      where: 'Email = ? AND Password = ? AND isMale = ?',
-      whereArgs: [e, p, currentSelectionIsMale ? 1 : 0],
-    );
-
-    return result.isNotEmpty;
   }
 }

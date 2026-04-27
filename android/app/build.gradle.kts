@@ -1,47 +1,29 @@
-plugins {
-    id("com.android.application")
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
-}
-
-android {
-    namespace = "com.example.my_secretspace"
-    compileSdkVersion(flutter.compileSdkVersion)
-    ndkVersion = flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    defaultConfig {
-    applicationId = "com.secretspace.app"
-    minSdk = flutter.minSdkVersion
-    targetSdkVersion(flutter.targetSdkVersion)
-    
-    versionCode = (project.findProperty("flutter.versionCode") as String? ?: "1").toInt()
-    versionName = project.findProperty("flutter.versionName") as String? ?: "1.0.0"
-    
-    multiDexEnabled = true
-    }
-
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+{
+  "project_info": {
+    "project_number": "854706494557",
+    "project_id": "secretspaceapp",
+    "storage_bucket": "secretspaceapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854706494557:android:aeb5896f6ac754de7101b4",
+        "android_client_info": {
+          "package_name": "com.secretspace.app"
         }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD9ntuCtp7mLyt8-mLRI3iqyC_tS-ZaJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
-}
-
-flutter {
-    source = "../.."
+  ],
+  "configuration_version": "1"
 }
